@@ -1,4 +1,4 @@
-PANDEMIC_VERSION=0
+PANDEMIC_VERSION=1561532996
 
 function update {
   return_value=1
@@ -130,8 +130,10 @@ function load_zshrc {
 
   autoload -Uz vcs_info
   zstyle ':vcs_info:*' enable git
+  zstyle ':vcs_info:*' unstagedstr "%F{red} ●%f"
   zstyle ':vcs_info:*' formats "(%F{blue}%s%f:%F{yellow}%b%f)"
-  zstyle ':vcs_info:git*' formats "(%F{cyan}%s%f:%F{yellow}%b%f)"
+  zstyle ':vcs_info:git*' formats "(%F{cyan}%s%f:%F{yellow}%b%f%u)"
+  zstyle ':vcs_info:*' check-for-changes true
 
   zstyle ':completion:*' accept-exact '*(N)'
   zstyle ':completion:*' use-cache on
@@ -256,20 +258,10 @@ function load_zshrc {
   	eval "$(pyenv virtualenv-init -)"
   fi
 
-  function docker_func {
-  	if where podman &>/dev/null; then
-  		if systemctl status docker &>/dev/null; then
-  			/usr/bin/docker $@
-  		else
-  			podman $@
-  		fi
-  	else
-  		/usr/bin/docker $@
-  	fi
-  }
-
-  if where podman &>/dev/null && where docker &>/dev/null; then
-    alias docker=docker_func
+  if where podman &>/dev/null; then
+  	if ! systemctl status docker &>/dev/null; then
+  		alias docker=podman
+	fi
   fi
 }
 
