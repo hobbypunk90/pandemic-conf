@@ -253,6 +253,10 @@ function load_zshrc {
   	eval "$(rbenv init -)"
   fi
 
+  if where nodenv &>/dev/null; then
+  	eval "$(nodenv init -)"
+  fi
+
   if where pyenv &>/dev/null; then
   	eval "$(pyenv init -)"
   	eval "$(pyenv virtualenv-init -)"
