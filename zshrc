@@ -79,6 +79,9 @@ function load_zshrc {
   			sudo apt install -y ca-certificates curl git
   		fi
   		install_antigen_fallback
+        elif where sw_vers &> /dev/null; then
+		echo "Mac OS X detected, install antigen with Brew..."
+                brew install antigen
   	else
   		echo "Do you want to install fallback antigen(download it to ~/.antigen/antigen.zsh)? [y/N]"
   		read yn
@@ -94,15 +97,17 @@ function load_zshrc {
   	curl -L git.io/antigen > ~/.antigen/antigen.zsh
   }
 
-  if [ ! -f /usr/share/zsh/share/antigen.zsh ] && [ ! -f ~/.antigen/antigen.zsh ]; then
+  if [ ! -f /usr/share/zsh/share/antigen.zsh ] && [ ! -f /usr/local/share/antigen/antigen.zsh ] && [ ! -f ~/.antigen/antigen.zsh ]; then
     install_antigen
-    if [ ! -f /usr/share/zsh/share/antigen.zsh ] && [ ! -f ~/.antigen/antigen.zsh ]; then
+    if [ ! -f /usr/share/zsh/share/antigen.zsh ] && [ ! -f /usr/local/share/antigen/antigen.zsh ] && [ ! -f ~/.antigen/antigen.zsh ]; then
       exit 1
     fi
   fi
 
   if [ -f /usr/share/zsh/share/antigen.zsh ]; then
   	source /usr/share/zsh/share/antigen.zsh
+  elif [ -f /usr/local/share/antigen/antigen.zsh ]; then
+        source /usr/local/share/antigen/antigen.zsh
   elif [ -f ~/.antigen/antigen.zsh ]; then
   	source ~/.antigen/antigen.zsh
   fi
@@ -188,6 +193,13 @@ function load_zshrc {
     echo ${vcs_info_msg_0_}
   }
 
+  function last_exit_code() {
+    last_exit_code=$?
+    if [[ $last_exit_code -ne 0 ]]; then
+      echo "%F{red}$last_exit_code%f "
+    fi
+  }
+
   if where glances &>/dev/null; then
   	alias glances='glances'
   	alias top='glances'
@@ -216,7 +228,7 @@ function load_zshrc {
   #fi
 
   PROMPT="[%F{red}%n%f@%F{blue}%m%f:%F{green}%1~%f]%# "
-  RPROMPT='$(version_control)$(extension)%'
+  RPROMPT='$(last_exit_code)$(version_control)$(extension)%'
 
   alias myip="curl https://www.monip.org -s | grep -Po --color=never \"(?<=IP : )[\d\.]+\""
   if where filebot &>/dev/null; then
@@ -253,13 +265,13 @@ function load_zshrc {
   	eval "$(rbenv init -)"
   fi
 
-  if where nodenv &>/dev/null; then
-  	eval "$(nodenv init -)"
-  fi
-
   if where pyenv &>/dev/null; then
   	eval "$(pyenv init -)"
   	eval "$(pyenv virtualenv-init -)"
+  fi
+
+  if where nodenv &>/dev/null; then
+  	eval "$(nodenv init -)"
   fi
 
   if where podman &>/dev/null; then
@@ -267,14 +279,16 @@ function load_zshrc {
   		alias docker=podman
 	fi
   fi
+  
+  [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+  
+  # load personal extra stuff
+  # make custom changes only to the .zshrcx file.
+  if [ -f ~/.zshrcx ]; then
+    source ~/.zshrcx
+  fi
 }
 
 if ! update; then
   load_zshrc
-fi
-
-# load personal extra stuff
-# make custom changes only to the .zshrcx file.
-if [ -f ~/.zshrcx ]; then
-  source ~/.zshrcx
 fi
