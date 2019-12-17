@@ -1,4 +1,4 @@
-PANDEMIC_VERSION=1561532996
+PANDEMIC_VERSION=0
 
 function update {
   return_value=1
@@ -258,37 +258,39 @@ function load_zshrc {
 
   alias dd="dd status=progress"
 
-  # Load rbenv automatically by appending
-  # the following to ~/.zshrc:
-
+  # Load {rb|py|nod|j}env automatically if existing
   if where rbenv &>/dev/null; then
   	eval "$(rbenv init -)"
   fi
 
   if where pyenv &>/dev/null; then
   	eval "$(pyenv init -)"
-  	eval "$(pyenv virtualenv-init -)"
+  	eval "$(pyenv virtualenv-init - 2> /dev/null)"
   fi
 
   if where nodenv &>/dev/null; then
   	eval "$(nodenv init -)"
   fi
 
+  if where jenv &>/dev/null; then
+    eval "$(jenv init -)"
+  fi
+
   if where podman &>/dev/null; then
   	if ! systemctl status docker &>/dev/null; then
   		alias docker=podman
-	fi
-  fi
-  
-  [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-  
-  # load personal extra stuff
-  # make custom changes only to the .zshrcx file.
-  if [ -f ~/.zshrcx ]; then
-    source ~/.zshrcx
+	  fi
   fi
 }
 
 if ! update; then
   load_zshrc
 fi
+
+# load personal extra stuff
+# make custom changes only to the .zshrcx file.
+if [ -f ~/.zshrcx ]; then
+  source ~/.zshrcx
+fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
