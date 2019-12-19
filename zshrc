@@ -24,7 +24,11 @@ function check_pandemic {
   tmp_file=$1
   date=$(cat $tmp_file | grep -Po "(?<=Last-Modified: ).{29}")
   if [ "$?" = "0" ]; then
-    version=$(date --date="$date" +"%s")
+    if where gdate &>/dev/null; then
+      version=$(gdate --date="$date" +"%s")
+    else
+      version=$(date --date="$date" +"%s")
+    fi
   fi
 
   if [[ "$version" != "" && "$PANDEMIC_VERSION" = "" || $PANDEMIC_VERSION -lt $version ]]; then
