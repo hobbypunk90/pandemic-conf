@@ -2,7 +2,7 @@ PANDEMIC_VERSION=0
 
 function update {
   return_value=1
-  if [ "$PANDEMIC_VERSION" = "" ] || ping -w1 -c1 github.com &>/dev/null; then
+  if [ "$PANDEMIC_VERSION" = "" ] || ping -W1 -c1 github.com &>/dev/null; then
     tmp_file=$(mktemp -t pandemic_zsh.XXXXXX)
     load_pandemic $tmp_file
     if check_pandemic $tmp_file; then
