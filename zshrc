@@ -22,7 +22,7 @@ function load_pandemic {
 
 function check_pandemic {
   tmp_file=$1
-  date=$(cat $tmp_file | grep -Po "(?<=Last-Modified: ).{29}")
+  date=$(cat $tmp_file | sed -n 's/Last-Modified: \(.*\)/\1/p')
   if [ "$?" = "0" ]; then
     if where gdate &>/dev/null; then
       version=$(gdate --date="$date" +"%s")
@@ -43,9 +43,10 @@ function check_pandemic {
 function update_pandemic {
   tmp_file=$1
   echo "Envolving..."
-  content="$(cat $tmp_file | grep -Po "(?<=\"content\": \").*(?=\",)")"
+  content="$(cat $tmp_file | sed -n 's/"content": "\(.*\)",/\1/p')"
   echo -e "$content" | base64 -d > $tmp_file
-  sed -i "1 s/PANDEMIC_VERSION=.*/PANDEMIC_VERSION=$version/" $tmp_file
+  sed -i".bak" "1 s/PANDEMIC_VERSION=.*/PANDEMIC_VERSION=$version/" $tmp_file
+  rm "${tmp_file}.bak"
   # follow symbolic link 😉
   echo "Mutating..."
   cp $tmp_file /tmp/zshrc.$USER
