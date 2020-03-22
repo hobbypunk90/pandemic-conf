@@ -45,7 +45,7 @@ function update_pandemic {
   echo "Envolving..."
   content="$(cat $tmp_file | sed -n 's/"content": "\(.*\)",/\1/p' | tr -d ' ')"
   echo -e "$content" | base64 -d > $tmp_file
-  if ! grep "^PANDEMIC_VERSION=" $tmp_file; then
+  if ! grep "^PANDEMIC_VERSION=" $tmp_file &>/dev/null; then
     false
   else
     sed -i".bak" "1 s/PANDEMIC_VERSION=.*/PANDEMIC_VERSION=$version/" $tmp_file
