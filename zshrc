@@ -1,18 +1,16 @@
 PANDEMIC_VERSION=0
 
 function update {
-  return_value=1
   if [ "$PANDEMIC_VERSION" = "" ] || ping -W1 -c1 github.com &>/dev/null; then
     tmp_file=$(mktemp -t pandemic_zsh.XXXXXX)
     load_pandemic $tmp_file
     if check_pandemic $tmp_file; then
-      update_pandemic $tmp_file
-      return_value=$?
+      if update_pandemic $tmp_file; then
+        echo "Please restart..."
+      fi
     fi
     rm -f $tmp_file
   fi
-
-  [ $return_value = 0 ]
 }
 
 function load_pandemic {
@@ -42,7 +40,7 @@ function check_pandemic {
 
 function update_pandemic {
   tmp_file=$1
-  echo "Envolving..."
+  echo "Evolving..."
   content="$(cat $tmp_file | sed -n 's/"content": "\(.*\)",/\1/p' | tr -d ' ')"
   echo -e "$content" | base64 -d > $tmp_file
   if ! grep "^PANDEMIC_VERSION=" $tmp_file &>/dev/null; then
@@ -51,10 +49,14 @@ function update_pandemic {
     sed -i".bak" "1 s/PANDEMIC_VERSION=.*/PANDEMIC_VERSION=$version/" $tmp_file
     rm "${tmp_file}.bak"
     # follow symbolic link 😉
-    echo "Mutating..."
+    echo -n "Mutate... "
     cp $tmp_file /tmp/zshrc.$USER
-    source /tmp/zshrc.$USER
-    cat /tmp/zshrc.$USER > ~/.zshrc
+    if source /tmp/zshrc.$USER; then
+      cat /tmp/zshrc.$USER > ~/.zshrc
+      echo "accepted"
+    else
+      echo "discarded"
+    fi
     rm /tmp/zshrc.$USER
     true
   fi
@@ -284,17 +286,11 @@ function load_zshrc {
   if where jenv &>/dev/null; then
     eval "$(jenv init -)"
   fi
-
-  if where podman &>/dev/null; then
-  	if ! systemctl status docker &>/dev/null; then
-  		alias docker=podman
-	  fi
-  fi
 }
 
-if ! update; then
-  load_zshrc
-fi
+update &
+
+load_zshrc
 
 # load personal extra stuff
 # make custom changes only to the .zshrcx file.
@@ -302,4 +298,6 @@ if [ -f ~/.zshrcx ]; then
   source ~/.zshrcx
 fi
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if [ -f ~/.fzf.zsh ]; then 
+  source ~/.fzf.zsh
+fi
