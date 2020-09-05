@@ -13,6 +13,11 @@ function update {
   fi
 }
 
+function silent_update {
+  setopt local_options no_notify no_monitor
+  update &
+}
+
 function load_pandemic {
   tmp_file=$1
   curl -i "https://api.github.com/repos/hobbypunk90/pandemic-conf/contents/zshrc" 2>/dev/null >$tmp_file
@@ -288,7 +293,7 @@ function load_zshrc {
   fi
 }
 
-update &
+silent_update
 
 load_zshrc
 
