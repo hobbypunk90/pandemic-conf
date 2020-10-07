@@ -25,7 +25,7 @@ function load_pandemic {
 
 function check_pandemic {
   tmp_file=$1
-  date=$(cat $tmp_file | sed -n 's/Last-Modified: \(.*\)/\1/pI')
+  date=$(cat $tmp_file | sed -n 's/[Ll]ast-[Mm]odified: \(.*\)/\1/p')
   if [ "$?" = "0" ]; then
     if where gdate &>/dev/null; then
       version=$(gdate --date="$date" +"%s")
