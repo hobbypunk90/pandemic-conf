@@ -77,40 +77,40 @@ function load_zshrc {
 
   function install_antigen {
     echo "Install Antigen"
-  	if uname -r | grep ARCH &> /dev/null; then
-  		echo "Arch based system detected, try to install antigen from aur..."
-  		pikaur -S antigen-git
-  	elif where opkg &> /dev/null; then
-  		echo "OPKG based system detected, install curl and git with opkg, then install antigen with fallback..."
-  		opkg install ca-certificates
-  		opkg install ca-bundle
-  		opkg install curl
-  		opkg install git
-  		install_antigen_fallback
-  	elif [ -f /etc/debian_version ]; then
-  		echo "Debian based system detected, install dependencies, then install antigen with fallback..."
-  		if [ "$USER" = "root" ]; then
-  			apt install -y ca-certificates curl git
-  		else
-  			sudo apt install -y ca-certificates curl git
-  		fi
-  		install_antigen_fallback
-        elif where sw_vers &> /dev/null; then
-		echo "Mac OS X detected, install antigen with Brew..."
-                brew install antigen
-  	else
-  		echo "Do you want to install fallback antigen(download it to ~/.antigen/antigen.zsh)? [y/N]"
-  		read yn
-  		case $yn in
-  			[Yy]* ) install_antigen_fallback;;
-  			* ) echo "Abort...";;
-  		esac
-  	fi
+    if uname -r | grep ARCH &> /dev/null; then
+      echo "Arch based system detected, try to install antigen from aur..."
+      pikaur -S antigen-git
+    elif where opkg &> /dev/null; then
+      echo "OPKG based system detected, install curl and git with opkg, then install antigen with fallback..."
+      opkg install ca-certificates
+      opkg install ca-bundle
+      opkg install curl
+      opkg install git
+      install_antigen_fallback
+    elif [ -f /etc/debian_version ]; then
+      echo "Debian based system detected, install dependencies, then install antigen with fallback..."
+      if [ "$USER" = "root" ]; then
+        apt install -y ca-certificates curl git
+      else
+        sudo apt install -y ca-certificates curl git
+      fi
+      install_antigen_fallback
+    elif where sw_vers &> /dev/null; then
+      echo "Mac OS X detected, install antigen with Brew..."
+      brew install antigen
+    else
+      echo "Do you want to install fallback antigen(download it to ~/.antigen/antigen.zsh)? [y/N]"
+      read yn
+      case $yn in
+        [Yy]* ) install_antigen_fallback;;
+  	* ) echo "Abort...";;
+      esac
+    fi
   }
 
   function install_antigen_fallback {
-  	mkdir -p ~/.antigen
-  	curl -L git.io/antigen > ~/.antigen/antigen.zsh
+    mkdir -p ~/.antigen
+    curl -L git.io/antigen > ~/.antigen/antigen.zsh
   }
 
   if [ ! -f /usr/share/zsh/share/antigen.zsh ] && [ ! -f /usr/local/share/antigen/antigen.zsh ] && [ ! -f ~/.antigen/antigen.zsh ]; then
@@ -121,11 +121,11 @@ function load_zshrc {
   fi
 
   if [ -f /usr/share/zsh/share/antigen.zsh ]; then
-  	source /usr/share/zsh/share/antigen.zsh
+    source /usr/share/zsh/share/antigen.zsh
   elif [ -f /usr/local/share/antigen/antigen.zsh ]; then
-        source /usr/local/share/antigen/antigen.zsh
+    source /usr/local/share/antigen/antigen.zsh
   elif [ -f ~/.antigen/antigen.zsh ]; then
-  	source ~/.antigen/antigen.zsh
+    source ~/.antigen/antigen.zsh
   fi
 
   antigen use oh-my-zsh
@@ -133,7 +133,7 @@ function load_zshrc {
   antigen bundle git
   antigen bundle git-extra
   if $(where tput > /dev/null); then
-  	antigen bundle mvn
+    antigen bundle mvn
   fi
   antigen bundle pip
   antigen bundle rails
@@ -161,7 +161,7 @@ function load_zshrc {
   zstyle ':completion:*' cache-path ~/.zsh/cache
 
   precmd() {
-      vcs_info &>/dev/null
+    vcs_info &>/dev/null
   }
 
   autoload -Uz promptinit
@@ -217,8 +217,8 @@ function load_zshrc {
   }
 
   if where glances &>/dev/null; then
-  	alias glances='glances'
-  	alias top='glances'
+    alias glances='glances'
+    alias top='glances'
   fi
   alias vi='vim'
 
@@ -248,16 +248,16 @@ function load_zshrc {
 
   alias myip="curl https://www.monip.org -s | grep -Po --color=never \"(?<=IP : )[\d\.]+\""
   if where filebot &>/dev/null; then
-  	alias filebot_movie="filebot -no-xattr -non-strict -rename --lang ger --db TheMovieDB --format \"{n.colon(' - ')} ({y}){' CD'+pi}\""
-  	alias filebot_serie="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./{n}/Season {s.pad(2)}/{n} - {s00e00} - {t}\""
-  	alias filebot_season="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./Season {s.pad(2)}/{n} - {s00e00} - {t}\""
-  	alias filebot_episodes="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./{n} - {s00e00} - {t}\""
+    alias filebot_movie="filebot -no-xattr -non-strict -rename --lang ger --db TheMovieDB --format \"{n.colon(' - ')} ({y}){' CD'+pi}\""
+    alias filebot_serie="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./{n}/Season {s.pad(2)}/{n} - {s00e00} - {t}\""
+    alias filebot_season="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./Season {s.pad(2)}/{n} - {s00e00} - {t}\""
+    alias filebot_episodes="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./{n} - {s00e00} - {t}\""
   fi
 
   if [ "$XDG_SESSION_DESKTOP" = "gnome" ]; then
-  	alias afk="dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock"
+    alias afk="dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock"
   elif [ "$XDG_SESSION_DESKTOP" = "KDE" ]; then
-  	alias afk="loginctl lock-session"
+    alias afk="loginctl lock-session"
   fi
 
   function rsync {
@@ -276,20 +276,30 @@ function load_zshrc {
 
   # Load {rb|py|nod|j}env automatically if existing
   if where rbenv &>/dev/null; then
-  	eval "$(rbenv init -)"
+    eval "$(rbenv init -)"
   fi
 
   if where pyenv &>/dev/null; then
-  	eval "$(pyenv init -)"
-  	eval "$(pyenv virtualenv-init - 2> /dev/null)"
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init - 2> /dev/null)"
   fi
 
   if where nodenv &>/dev/null; then
-  	eval "$(nodenv init -)"
+    eval "$(nodenv init -)"
   fi
 
   if where jenv &>/dev/null; then
     eval "$(jenv init -)"
+  fi
+
+  if where kubectl &>/dev/null; then
+    export KUBECONFIG="${HOME}/.kube/config"
+    for file in ${HOME}/.kube/*.kube; do 
+      export KUBECONFIG="${KUBECONFIG}:${file}"
+    done
   fi
 }
 
@@ -303,6 +313,6 @@ if [ -f ~/.zshrcx ]; then
   source ~/.zshrcx
 fi
 
-if [ -f ~/.fzf.zsh ]; then 
+if [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
