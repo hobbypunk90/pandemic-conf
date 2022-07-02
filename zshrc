@@ -247,12 +247,6 @@ function load_zshrc {
   RPROMPT='$(last_exit_code)$(version_control)$(extension)%'
 
   alias myip="curl https://www.monip.org -s | grep -Po --color=never \"(?<=IP : )[\d\.]+\""
-  if where filebot &>/dev/null; then
-    alias filebot_movie="filebot -no-xattr -non-strict -rename --lang ger --db TheMovieDB --format \"{n.colon(' - ')} ({y}){' CD'+pi}\""
-    alias filebot_serie="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./{n}/Season {s.pad(2)}/{n} - {s00e00} - {t}\""
-    alias filebot_season="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./Season {s.pad(2)}/{n} - {s00e00} - {t}\""
-    alias filebot_episodes="filebot -no-xattr -non-strict -rename --order airdate --lang ger --db TheTVDB --format \"./{n} - {s00e00} - {t}\""
-  fi
 
   if [ "$XDG_SESSION_DESKTOP" = "gnome" ]; then
     alias afk="dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock"
@@ -300,6 +294,10 @@ function load_zshrc {
     for file in ${HOME}/.kube/*.kube; do 
       export KUBECONFIG="${KUBECONFIG}:${file}"
     done
+  fi
+
+  if where codium &>/dev/null; then
+    alias code="codium"
   fi
 }
 
