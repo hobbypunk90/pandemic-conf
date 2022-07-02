@@ -77,9 +77,13 @@ function load_zshrc {
 
   function install_antigen {
     echo "Install Antigen"
-    if uname -r | grep ARCH &> /dev/null; then
+    if cat /etc/os-release | grep -P "ID(_LIKE)?=arch"; then
       echo "Arch based system detected, try to install antigen from aur..."
-      pikaur -S antigen-git
+      if where pikaur &> /dev/null; then
+        pikaur -S antigen
+      elif where yay &> /dev/null; then
+        yay -S antigen
+      fi
     elif where opkg &> /dev/null; then
       echo "OPKG based system detected, install curl and git with opkg, then install antigen with fallback..."
       opkg install ca-certificates
