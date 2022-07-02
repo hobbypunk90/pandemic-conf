@@ -299,6 +299,11 @@ function load_zshrc {
   if where codium &>/dev/null; then
     alias code="codium"
   fi
+  
+  if where gpaste-client &>/dev/null; then
+    alias copy="gpaste-client"
+    alias paste="gpaste-client --use-index get 0"
+  fi
 }
 
 silent_update
