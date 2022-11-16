@@ -143,6 +143,7 @@ function load_zshrc {
   antigen bundle rails
   antigen bundle systemd
   antigen bundle docker
+  antigen bundle macunha1/zsh-terraform
 
   antigen bundle zsh-users/zsh-completions
   antigen bundle zsh-users/zsh-autosuggestions
@@ -226,29 +227,49 @@ function load_zshrc {
   fi
   alias vi='vim'
 
-  #if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-    bindkey "\e[1~" beginning-of-line
-    bindkey "\e[4~" end-of-line
-    bindkey "\e[5~" beginning-of-history
-    bindkey "\e[6~" end-of-history
-    bindkey "\e[7~" beginning-of-line
-    bindkey "\e[3~" delete-char
-    bindkey "\e[2~" quoted-insert
-    bindkey "\e[5C" forward-word
-    bindkey "\e[5D" backward-word
-    bindkey "\e\e[C" forward-word
-    bindkey "\e\e[D" backward-word
-    bindkey "\e[1;5C" forward-word
-    bindkey "\e[1;5D" backward-word
-    bindkey "\e[8~" end-of-line
-    bindkey "\eOH" beginning-of-line
-    bindkey "\eOF" end-of-line
-    bindkey "\e[H" beginning-of-line
-    bindkey "\e[F" end-of-line
-  #fi
+  # create a zkbd compatible hash;
+  # to add other keys to this hash, see: man 5 terminfo
+  typeset -g -A key
+
+  key[Home]="${terminfo[khome]}"
+  key[End]="${terminfo[kend]}"
+  key[Insert]="${terminfo[kich1]}"
+  key[Backspace]="${terminfo[kbs]}"
+  key[Delete]="${terminfo[kdch1]}"
+  key[Up]="${terminfo[kcuu1]}"
+  key[Down]="${terminfo[kcud1]}"
+  key[Left]="${terminfo[kcub1]}"
+  key[Right]="${terminfo[kcuf1]}"
+  key[PageUp]="${terminfo[kpp]}"
+  key[PageDown]="${terminfo[knp]}"
+  key[Shift-Tab]="${terminfo[kcbt]}"
+
+  # setup key accordingly
+  [[ -n "${key[Home]}"      ]] && bindkey -- "${key[Home]}"       beginning-of-line
+  [[ -n "${key[End]}"       ]] && bindkey -- "${key[End]}"        end-of-line
+  [[ -n "${key[Insert]}"    ]] && bindkey -- "${key[Insert]}"     overwrite-mode
+  [[ -n "${key[Backspace]}" ]] && bindkey -- "${key[Backspace]}"  backward-delete-char
+  [[ -n "${key[Delete]}"    ]] && bindkey -- "${key[Delete]}"     delete-char
+  [[ -n "${key[Up]}"        ]] && bindkey -- "${key[Up]}"         up-line-or-history
+  [[ -n "${key[Down]}"      ]] && bindkey -- "${key[Down]}"       down-line-or-history
+  [[ -n "${key[Left]}"      ]] && bindkey -- "${key[Left]}"       backward-char
+  [[ -n "${key[Right]}"     ]] && bindkey -- "${key[Right]}"      forward-char
+  [[ -n "${key[PageUp]}"    ]] && bindkey -- "${key[PageUp]}"     beginning-of-buffer-or-history
+  [[ -n "${key[PageDown]}"  ]] && bindkey -- "${key[PageDown]}"   end-of-buffer-or-history
+  [[ -n "${key[Shift-Tab]}" ]] && bindkey -- "${key[Shift-Tab]}"  reverse-menu-complete
+
+  # Finally, make sure the terminal is in application mode, when zle is
+  # active. Only then are the values from $terminfo valid.
+  if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
+    autoload -Uz add-zle-hook-widget
+    function zle_application_mode_start { echoti smkx }
+    function zle_application_mode_stop { echoti rmkx }
+    add-zle-hook-widget -Uz zle-line-init zle_application_mode_start
+    add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
+  fi
 
   PROMPT="[%F{red}%n%f@%F{blue}%m%f:%F{green}%1~%f]%# "
-  RPROMPT='$(last_exit_code)$(version_control)$(extension)%'
+  RPROMPT='$(last_exit_code)$(version_control)$(extension)'
 
   alias myip="curl https://www.monip.org -s | grep -Po --color=never \"(?<=IP : )[\d\.]+\""
 
@@ -271,6 +292,9 @@ function load_zshrc {
   fi
 
   alias dd="dd status=progress"
+  if where terraform &>/dev/null; then
+    alias tfsearch='tfp -out=/tmp/tfplan && tfs -json /tmp/tfplan | jq'
+  fi
 
   # Load {rb|py|nod|j}env automatically if existing
   if where rbenv &>/dev/null; then
@@ -293,11 +317,23 @@ function load_zshrc {
     eval "$(jenv init -)"
   fi
 
-  if where kubectl &>/dev/null; then
+  if where kubectl &>/dev/null && [ -d "${HOME}/.kube" ]; then
     export KUBECONFIG="${HOME}/.kube/config"
-    for file in ${HOME}/.kube/*.kube; do 
-      export KUBECONFIG="${KUBECONFIG}:${file}"
-    done
+    if ls ${HOME}/.kube/*.kube &>/dev/null; then
+      for file in ${HOME}/.kube/*.kube; do 
+        export KUBECONFIG="${file}:${KUBECONFIG}"
+      done
+    fi
+
+    if kubectl krew &>/dev/null; then
+      export PATH="${PATH}:${HOME}/.krew/bin"
+      eval "$(kubectl krew completion zsh)"
+    fi
+
+    if kubectl hns &>/dev/null; then
+      eval "$(kubectl hns completion zsh)"
+    fi
+
   fi
 
   if where codium &>/dev/null; then
