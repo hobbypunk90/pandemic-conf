@@ -54,7 +54,7 @@ function update_pandemic {
   else
     sed -i".bak" "1 s/PANDEMIC_VERSION=.*/PANDEMIC_VERSION=$version/" $tmp_file
     rm "${tmp_file}.bak"
-    # follow symbolic link 😉
+    # follow symbolic link 😉krew
     echo -n "Mutate... "
     cp $tmp_file /tmp/zshrc.$USER
     if source /tmp/zshrc.$USER; then
@@ -321,8 +321,7 @@ function load_zshrc {
     fi
 
     if kubectl krew &>/dev/null; then
-      export PATH="${PATH}:${HOME}/.krew/bin"
-      eval "$(kubectl krew completion zsh)"
+      PATH="${PATH}:${HOME}/.krew/bin"
     fi
 
     if kubectl hns &>/dev/null; then
