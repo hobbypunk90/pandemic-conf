@@ -1,4 +1,5 @@
 PANDEMIC_VERSION=0
+# https://github.com/hobbypunk90/pandemic-conf/blob/main/zshrc
 
 function update {
   if [ "$PANDEMIC_VERSION" = "" ] || ping -W1 -c1 github.com &>/dev/null; then
@@ -134,6 +135,10 @@ function load_zshrc {
 
   antigen use oh-my-zsh
 
+  if [ -f /usr/bin/mise ]; then
+    eval "$(mise activate zsh --shims)" # this sets up interactive sessions
+  fi
+
   antigen bundle git
   antigen bundle git-extra
   if $(where tput > /dev/null); then
@@ -203,8 +208,8 @@ function load_zshrc {
   }
 
   function extension {
-    if where upower &>/dev/null && [ "$(upower -e | grep -m1 "battery")" != "" ]; then
-      battery $(upower -e | grep -m1 "battery")
+    if where upower &>/dev/null && [ "$(upower -e | grep -m1 "BAT")" != "" ]; then
+      battery $(upower -e | grep -m1 "BAT")
     elif [ -f "/sys/class/thermal/thermal_zone0/temp" ]; then
       temp
     fi
@@ -291,37 +296,27 @@ function load_zshrc {
     PATH=$HOME/.local/bin:$PATH
   fi
 
+  if [ -d $HOME/.cargo/bin ]; then
+    PATH=$HOME/.cargo/bin:$PATH
+  fi
+
   alias dd="dd status=progress"
   if where terraform &>/dev/null; then
     alias tfsearch='tfp -out=/tmp/tfplan && tfs -json /tmp/tfplan | jq'
   fi
 
-  # Load {rb|py|nod|j}env automatically if existing
-  if where rbenv &>/dev/null; then
-    eval "$(rbenv init -)"
-  fi
-
-  if where pyenv &>/dev/null; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init - 2> /dev/null)"
-  fi
-
-  if where nodenv &>/dev/null; then
-    eval "$(nodenv init -)"
-  fi
-
-  if where jenv &>/dev/null; then
-    eval "$(jenv init -)"
-  fi
-
   if where kubectl &>/dev/null && [ -d "${HOME}/.kube" ]; then
-    export KUBECONFIG="${HOME}/.kube/config"
-    if ls ${HOME}/.kube/*.kube &>/dev/null; then
+    if [ -f "${HOME}/.kube/config" ]; then
+      export KUBECONFIG="${HOME}/.kube/config"
+    fi
+
+    if ls "${HOME}/.kube/" | grep ".kube" &>/dev/null; then
       for file in ${HOME}/.kube/*.kube; do 
-        export KUBECONFIG="${file}:${KUBECONFIG}"
+        if [ "" = "${KUBECONFIG}" ]; then
+          export KUBECONFIG="${file}"
+        else
+          export KUBECONFIG="${file}:${KUBECONFIG}"
+        fi
       done
     fi
 
